@@ -3,6 +3,8 @@
 // versión: 20240419
 // autor: Carlos Grasa Lambea
 
+import java.io.*;
+
 public final class K {
 	static String prontuario = " -> ";
 
@@ -198,38 +200,10 @@ public final class K {
 		escribir("\n".repeat(40));
 		return;
 	}
-// -------------------------------------------------- archivos -------------------------------------------
-/*	Reading a File by Using Buffered Stream I/O
-
-	The newBufferedReader(Path, Charset) method opens a file for reading, returning a BufferedReader that can be used to read text from a file in an efficient manner.
-
-	The following code snippet shows how to use the newBufferedReader method to read from a file. The file is encoded in "US-ASCII."
-
-	Charset charset = Charset.forName("US-ASCII");
-try (BufferedReader reader = Files.newBufferedReader(file, charset)) {
-		String line = null;
-		while ((line = reader.readLine()) != null) {
-			System.out.println(line);
-		}
-	} catch (IOException x) {
-		System.err.format("IOException: %s%n", x);
+	static void pausarConsola() {
+		preguntar("Pulse INTRO para continuar");
+		return;
 	}
-
-	Writing a File by Using Buffered Stream I/O
-
-	You can use the newBufferedWriter(Path, Charset, OpenOption...) method to write to a file using a BufferedWriter.
-
-	The following code snippet shows how to create a file encoded in "US-ASCII" using this method:
-
-	Charset charset = Charset.forName("US-ASCII");
-	String s = ...;
-try (BufferedWriter writer = Files.newBufferedWriter(file, charset)) {
-		writer.write(s, 0, s.length());
-	} catch (IOException x) {
-		System.err.format("IOException: %s%n", x);
-	}
-*/
-
 	static String[] listarDirectorio(String ruta) { // devuelve lista de los elementos de un directorio
 		java.io.File archivo = new java.io.File(ruta);
 		if (archivo.exists())
@@ -237,7 +211,6 @@ try (BufferedWriter writer = Files.newBufferedWriter(file, charset)) {
 		else
 			return new String[0];
 	}
-
 	static String getPropiedadesArchivo(String ruta) { // devuelve las propiedades de un archivo
 		java.io.File archivo = new java.io.File(ruta);
 		String propiedades = "";
@@ -253,6 +226,47 @@ try (BufferedWriter writer = Files.newBufferedWriter(file, charset)) {
 			propiedades += archivo.isHidden() ? "h" : "";
 		}
 		return propiedades;
+	}
+	static boolean guardarObjeto(Object objeto, String archivo) { // serializa un objeto y lo guarda en archivo
+		try {
+			File fil = new File(archivo);
+			if (!fil.exists() || !fil.isFile() || !fil.canWrite())
+				return false;
+			FileOutputStream fos = new FileOutputStream(fil);
+			BufferedOutputStream bos=new BufferedOutputStream(fos);
+			ObjectOutputStream oos=new ObjectOutputStream(bos);
+			oos.writeObject(objeto);
+			oos.close();
+			bos.close();
+			fos.close();
+			return true;
+		} catch (Exception exc) {
+			K.escribir("- Error abriendo archivo \"" + archivo + "\" para guardar.\n");
+			K.escribir(exc.getMessage() + "\n");
+			exc.printStackTrace();
+			return false;
+		}
+	}
+	static Object obtenerObjeto(String archivo) { // deserializa un objeto y lo obtiene de un archivo
+		try {
+			Object objeto;
+			File fil = new File(archivo);
+			if (!fil.exists() || !fil.isFile() || !fil.canRead())
+				return null;
+			FileInputStream fis = new FileInputStream(fil);
+			BufferedInputStream bis=new BufferedInputStream(fis);
+			ObjectInputStream ois=new ObjectInputStream(bis);
+			objeto=ois.readObject();
+			ois.close();
+			bis.close();
+			fis.close();
+			return objeto;
+		} catch (Exception exc) {
+			K.escribir("- Error abriendo archivo \"" + archivo + "\" para guardar.\n");
+			K.escribir(exc.getMessage() + "\n");
+			exc.printStackTrace();
+			return null;
+		}
 	}
 
 // ------------------------------------- main --------------------------------------------------------
